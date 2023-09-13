@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside tab */
+        .tab .tabLinks {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /*Styling tab content*/
+        .tabContent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+
+        input[type="text"] {
+            width: auto;
+            text-align: center;
+        }
+
+        ul {
+            padding: 0px;
+        }
+
+        .PPblock {
+            will-change: transform;
+            text-align: center;
+            border-radius: 10px;
+            height: 50px;
+            list-style-type: none;
+            margin: 10px;
+            background-color: #ccc;
+            width: 250px;
+            line-height: 3.2;
+            padding-left: 10px;
+            cursor: move;
+            transition: all 200ms;
+            user-select: none;
+            margin: 10px auto;
+            position: relative;
+            /* border-color: black;
+            border-width: 200px; */
+        }
+
+        .over {
+            transform: scale(1.1, 1.1);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Active Learning</h1>
+    <p>Complete the following tasks</p>
+    <div class="tab">
+        <button class="tabLinks" onclick="openTab(event, 'MCQ')">Multiple Choice Question</button>
+        <button class="tabLinks" onclick="openTab(event, 'PP')">Parson's Problems</button>
+        <button class="tabLinks" onclick="openTab(event, 'FIB')">Fill in the Blanks</button>
+        <button class="tabLinks" onclick="openTab(event, 'SCAF')">Scaffolded Code</button>
+        <button class="tabLinks" onclick="openTab(event, 'SKEL')">Skeleton Code</button>
+    </div>
+    <div id="MCQ" class="tabContent">
+        <fieldset>
+            <form>
+                <legend>What is the import function used for?</legend>
+                <div>
+                    <input type="radio" id="ek" value="ek" class="mcq incorrect" />
+                    <label for="ek">The import statement is used to make your Python code look more professional and
+                        organized.</label>
+                </div>
+                <div>
+                    <input type="radio" id="do" value="do" class="mcq correct" />
+                    <label for="do">The import statement is used to bring external modules, libraries, or functionality
+                        into
+                        your Python code so that you
+                        can use them.</label>
+                </div>
+                <div>
+                    <input type="radio" id="teen" value="teen" class="mcq incorrect" />
+                    <label for="teen">The import statement is used to define variables and constants in Python.</label>
+                </div>
+                <div>
+                    <input type="radio" id="chaar" value="chaar" class="mcq incorrect" />
+                    <label for="chaar">You use import to add comments or documentation to your code.</label>
+                </div>
+                <button class="submitButton" id="submitMCQ" onclick="checkMCQ(event)">Submit</button>
+                <button class="nextTab" id="nextMCQ" onclick="openTab(event, 'PP')">Next</button>
+            </form>
+        </fieldset>
+
+    </div>
+    <div id="PP" class="tabContent">
+        <fieldset>
+            <form>
+                <p> Rearrange the following codeblocks to write a function that returns true is a search element is
+                    present in a list
+                </p>
+                <div id="PPcontainer">
+                    <ul id="PPlist"></ul>
+                </div>
+                <div id="resultPP"></div>
+                <button class="submitButton" id="submitPP" onclick="checkPP(event)">Submit</button>
+                <button class="nextTab" id="nextPP" onclick="openTab(event, 'FIB')">Next</button>
+            </form>
+        </fieldset>
+    </div>
+    <div id="FIB" class="tabContent">
+        <fieldset>
+            <form id="quizForm">
+                <p>Python is an <input type="text" id="blank1" placeholder="         ">-source programming language,
+                    which means its source code is freely available for anyone to view, modify, and distribute. Python's
+                    philosophy is guided by the "<input type="text" id="blank2" placeholder="         "> of <input
+                        type="text" id="blank3" placeholder="         ">" principles, emphasizing readability and
+                    simplicity in code. Python uses <input type="text" id="blank4" placeholder="         ">-based
+                    indentation to define blocks of code, replacing traditional braces or keywords used in other
+                    languages. A Python <input type="text" id="blank5" placeholder="         "> is a reusable block of
+                    code that can be called with a specific set of inputs, and it typically returns a value.</p>
+                <div id="resultFIB"></div>
+                <button class="submitButton" id="submitFIB" onclick="checkFIB(event)">Submit</button>
+                <button class="nextTab" id="nextFIB" onclick="openTab(event, 'SCAF')">Next</button>
+            </form>
+        </fieldset>
+    </div>
+    <div id="SCAF" class="tabContent">
+        <p>Heavily scaffolded code</p>
+        <button class="nextTab" id="nextSCAF" onclick="openTab(event, 'SKEL')">Next</button>
+    </div>
+    <div id="SKEL" class="tabContent">
+        <p>Skeleton code</p>
+        <button class="nextTab" id="nextSKEL" onclick="openTab(event, 'MCQ')">Next</button>
+    </div>
+    <script>
+        /* Function to open tab in page */
+        function openTab(event, tabID) {
+            event.preventDefault();
+            let i, tabContent, tabLinks;
+            tabContent = document.getElementsByClassName("tabContent");
+            for (i = 0; i < tabContent.length; i += 1) {
+                tabContent[i].style.display = "none";
+            }
+            tabLinks = document.getElementsByClassName("tabLinks");
+            for (i = 0; i < tabLinks.length; i += 1) {
+                tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabID).style.display = "block"
+            event.currentTarget.className += " active";
+        }
+
+        function checkMCQ(event) {
+            event.preventDefault();
+            const options = document.querySelectorAll(".mcq");
+            let optionSelected = false;
+            for (let i = 0; i < 4; i++) {
+                let option = options[i];
+                if (option.checked) {
+                    optionSelected = true;
+                    break;
+                }
+            }
+            if (!optionSelected) {
+                alert("Please select an option");
+                return;
+            }
+            // Get correct and incorrect options
+            const correctOptions = document.querySelectorAll(".mcq.correct");
+            const incorrectOptions = document.querySelectorAll(".mcq.incorrect");
+            // Apply styles to correct options (green) and incorrect options (red)
+            correctOptions.forEach(option => {
+                option.nextElementSibling.style.color = "green"; // Label
+                option.disabled = true;
+            });
+            incorrectOptions.forEach(option => {
+                option.nextElementSibling.style.color = "red"; // Label
+                option.disabled = true;
+            });
+            document.querySelector("#submitMCQ").disabled = true;
+        }
+
+        function checkFIB(event) {
+            event.preventDefault();
+            const answers = {
+                blank1: "open",
+                blank2: "zen",
+                blank3: "python",
+                blank4: "whitespace",
+                blank5: "function"
+            };
+            let correct = true;
+            for (const blank in answers) {
+                const inputField = document.getElementById(blank);
+                const userAnswer = inputField.value.trim().toLowerCase();
+                const correctAnswer = answers[blank];
+                if (userAnswer === correctAnswer) {
+                    inputField.style.boxShadow = "0 0 0 1px green"; // Indicate correct answers
+                    inputField.disabled = true;
+                } else {
+                    inputField.style.boxShadow = "0 0 0 1px red"; // Indicate incorrect answers
+                    correct = false;
+                }
+            }
+            if (correct) {
+                document.querySelector("#resultFIB").textContent = "All answers are correct!";
+                document.querySelector("#submitFIB").disabled = true;
+            }
+        }
+
+        function initPP(question) {
+            const pplist = document.querySelector("#PPlist");
+            const keys = Object.keys(question);
+            for (let j = keys.length; j > 0; j--) {
+                let randIndex = Math.floor(Math.random() * keys.length);
+                const val = question[keys[randIndex]];
+                let ppElem = document.createElement("li");
+                ppElem.id = keys[randIndex];
+                ppElem.className = "PPblock";
+                ppElem.draggable = true;
+                ppElem.textContent = val;
+                pplist.append(ppElem);
+                keys.splice(randIndex, 1);
+            }
+            let list = document.querySelectorAll(".PPblock");
+            [].forEach.call(list, function (item) {
+                addEventsDragAndDrop(item);
+            });
+        };
+
+        function dragStart(e) {
+            this.style.opacity = "0.4";
+            dragSrcEl = this;
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/html", this.innerHTML);
+        };
+
+        function dragEnter(e) {
+            this.classList.add("over");
+        }
+
+        function dragLeave(e) {
+            e.stopPropagation();
+            this.classList.remove("over");
+        }
+
+        function dragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            return false;
+        }
+
+        function dragDrop(e) {
+            if (dragSrcEl != this) {
+
+                dragSrcEl.innerHTML = this.innerHTML;
+                this.innerHTML = e.dataTransfer.getData("text/html");
+                let temp = e.currentTarget.id;
+                e.currentTarget.id = dragSrcEl.id;
+                dragSrcEl.id = temp;
+            }
+            return false;
+        }
+
+        function dragEnd(e) {
+            const list = document.querySelectorAll(".PPblock");
+            [].forEach.call(list, function (item) {
+                item.classList.remove("over");
+            });
+            this.style.opacity = "1";
+        }
+
+        function addEventsDragAndDrop(el) {
+            el.addEventListener("dragstart", dragStart, false);
+            el.addEventListener("dragenter", dragEnter, false);
+            el.addEventListener("dragover", dragOver, false);
+            el.addEventListener("dragleave", dragLeave, false);
+            el.addEventListener("drop", dragDrop, false);
+            el.addEventListener("dragend", dragEnd, false);
+        }
+
+        // Check if the code blocks are in the correct order
+        function checkPP(event) {
+            event.preventDefault();
+            const ppelements = document.querySelectorAll(".PPblock");
+
+            for (i = 0; i < ppelements.length; i++) {
+                element = ppelements[i];
+
+
+                if (Number(element.id[2]) !== i + 1) {
+                    document.querySelector("#resultPP").textContent = "Try Again";
+                    return;
+                }
+            }
+            document.querySelector("#resultPP").textContent = "All answers are correct!";
+            document.querySelector("#submitPP").disabled = true;
+            document.querySelector("#PPcontainer").style.pointerEvents = "none";
+        }
+        PPquestion = {
+            PP1: "fun (ls, searchElem):",
+            PP2: "for elem in ls:",
+            PP3: "if (elem == searchElem): ",
+            PP4: "return True",
+            PP5: "return False"
+        }
+        document.addEventListener("DOMContentLoaded", initPP(PPquestion));
+    </script>
+
+</body>
+
+</html>
