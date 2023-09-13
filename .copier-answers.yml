@@ -1,0 +1,21 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.2.0
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: variarb@umich.edu
+author_name: Bharath Variar
+data_format: string
+file_extension: ''
+has_binder: true
+has_settings: false
+kind: frontend
+labextension_name: etc_activelearning
+mimetype: ''
+mimetype_name: ''
+project_short_description: A JupyterLab extension that enables data-science instructors
+    to improve teaching by including tasks for students to complete during video lecutres
+    on MOOCs
+python_name: etc_activelearning
+repository: https://github.com/bharathvariar/etc-activelearning.git
+test: true
+viewer_name: ''
+
