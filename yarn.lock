@@ -2053,7 +2053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/application@npm:^4.0.0, @jupyterlab/application@npm:^4.0.5":
+"@jupyterlab/application@npm:^4.0.5":
   version: 4.0.5
   resolution: "@jupyterlab/application@npm:4.0.5"
   dependencies:
@@ -6092,8 +6092,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "etc_activelearning@workspace:."
   dependencies:
-    "@jupyterlab/application": ^4.0.0
+    "@jupyterlab/application": ^4.0.5
     "@jupyterlab/builder": ^4.0.0
+    "@jupyterlab/notebook": ^4.0.5
     "@jupyterlab/testutils": ^4.0.0
     "@types/jest": ^29.2.0
     "@types/json-schema": ^7.0.11
