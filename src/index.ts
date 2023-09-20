@@ -3,7 +3,7 @@ import {
 	JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay } from './utils'
+import { hideCells, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay } from './utils'
 
 /**
  * Initialization data for the etc_activelearning extension.
@@ -19,7 +19,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 	) => {
 		console.log('JupyterLab extension etc_activelearning is activated!');
 		notebooktracker.widgetAdded.connect(async (_, notebookPanel: NotebookPanel) => {
-			// waits for widget to be added. 
+			// Waits for widget to be added. 
 			// Connect runs when it receives a signal on added widget and then we fetch the notebook panel
 			// Logic for getting cell list
 			// ? -> ensures that no errors even if the notebook is empty
@@ -35,41 +35,43 @@ const plugin: JupyterFrontEndPlugin<void> = {
 						const cellElement = notebook.content.widgets.find(widget => {
 							return widget.model === cell;
 						});
-						// CSS
+						if (cellElement) {
+							hideCells(cellElement.node);
+						}
 						switch (activelearning) {
 							case 'mcq': {
-								if (cellElement) {
-									mcqOverlay(cell, cellElement.node, cellElement?.model.id);
-								}
 								console.log("activelearning: ", activelearning);
-								break;
-							}
-							case 'pp': {
 								if (cellElement) {
-									ppOverlay(cell, cellElement.node, cellElement?.model.id);
+									mcqOverlay(cell, cellElement.node);
 								}
-								console.log("activelearning:  ", activelearning);
 								break;
 							}
 							case 'fib': {
-								if (cellElement) {
-									fibOverlay(cell, cellElement.node, cellElement?.model.id);
-								}
 								console.log("activelearning:  ", activelearning);
+								if (cellElement) {
+									fibOverlay(cell, cellElement.node);
+								}
+								break;
+							}
+							case 'pp': {
+								console.log("activelearning:  ", activelearning);
+								if (cellElement) {
+									ppOverlay(cell, cellElement.node, cellElement?.model.id);
+								}
 								break;
 							}
 							case 'scaf': {
+								console.log("activelearning:  ", activelearning);
 								if (cellElement) {
 									scafOverlay(cell, cellElement?.node, cellElement?.model.id);
 								}
-								console.log("activelearning:  ", activelearning);
 								break;
 							}
 							case 'skel': {
+								console.log("activelearning:  ", activelearning);
 								if (cellElement) {
 									skelOverlay(cell, cellElement?.node, cellElement?.model.id);
 								}
-								console.log("activelearning:  ", activelearning);
 								break;
 							}
 						}
