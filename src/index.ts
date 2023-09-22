@@ -3,7 +3,7 @@ import {
 	JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { hideCells, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay } from './utils'
+import { hideCells, applyStyles, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay} from './utils'
 
 /**
  * Initialization data for the etc_activelearning extension.
@@ -26,6 +26,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 			await notebookPanel.revealed;
 			const notebook = app.shell.currentWidget as NotebookPanel;
 			const cellList = notebookPanel.content.model?.cells;
+			requestAnimationFrame(() => {
+				console.log('eventlistener');
+				applyStyles();
+			});
 			if (cellList !== undefined) {
 				for (let i = 0; i < cellList.length; i++) {
 					let cell = cellList?.get(i);
@@ -42,6 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 							case 'mcq': {
 								console.log("activelearning: ", activelearning);
 								if (cellElement) {
+									// hideCells(cellElement.node);
 									mcqOverlay(cell, cellElement.node);
 								}
 								break;
@@ -49,6 +54,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 							case 'fib': {
 								console.log("activelearning:  ", activelearning);
 								if (cellElement) {
+									// hideCells(cellElement.node);
 									fibOverlay(cell, cellElement.node);
 								}
 								break;
@@ -56,7 +62,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 							case 'pp': {
 								console.log("activelearning:  ", activelearning);
 								if (cellElement) {
-									ppOverlay(cell, cellElement.node, cellElement?.model.id);
+									ppOverlay(cell, cellElement.node);
 								}
 								break;
 							}

@@ -5,13 +5,63 @@ export const hideCells = (node: HTMLElement) => {
     }
 }
 
+export const applyStyles = () => {
+    // Styles for PP Blocks and their movements
+    console.log('applyStyles');
+    let ppBlocks = document.querySelectorAll(".PPblock");
+    ppBlocks.forEach((ppBlock: Element) => {
+        const ppBlockElement = ppBlock as HTMLElement; // Cast to HTMLElement
+        ppBlockElement.style.willChange = "transform";
+        ppBlockElement.style.textAlign = "center";
+        ppBlockElement.style.borderRadius = "10px";
+        ppBlockElement.style.height = "50px";
+        ppBlockElement.style.listStyleType = "none";
+        ppBlockElement.style.margin = "10px";
+        ppBlockElement.style.backgroundColor = "#ccc";
+        ppBlockElement.style.width = "250px";
+        ppBlockElement.style.lineHeight = "3.2";
+        ppBlockElement.style.paddingLeft = "10px";
+        ppBlockElement.style.cursor = "move";
+        ppBlockElement.style.transition = "all 200ms";
+        ppBlockElement.style.userSelect = "none";
+        ppBlockElement.style.margin = "10px auto";
+        ppBlockElement.style.position = "relative";
+        ppBlockElement.style.borderColor = "black";
+        ppBlockElement.style.borderWidth = "200px";
+    });
+
+    let overElements = document.querySelectorAll(".over");
+    overElements.forEach((element: Element) => {
+        const overElement = element as HTMLElement; // Cast to HTMLElement
+        overElement.style.transform = "scale(1.1, 1.1)";
+    });
+
+    // Apply styles to ul
+    let ulList = document.querySelectorAll('ul');
+    ulList.forEach((ul: Element) => {
+        const ulElement = ul as HTMLElement; // Cast to HTMLElement
+        ulElement.style.padding = "0px";
+    });
+
+    // Apply styles for FIB inputs
+    let textInputs = document.querySelectorAll('input[type="text"]');
+    textInputs.forEach((textInput: Element) => {
+        const textInputElement = textInput as HTMLInputElement; // Cast to HTMLInputElement
+        textInputElement.style.width = "auto";
+        textInputElement.style.textAlign = "center";
+    });
+}
+
 export const mcqOverlay = (cell: any, node: HTMLElement) => {
 
     //Creating form
     const box = document.createElement('fieldset');
     const overlay = document.createElement('form');
+    const title = document.createElement('h3');
+    title.textContent = 'Choose the most appropriate option';
     box.appendChild(overlay);
     node.appendChild(box);
+    overlay.appendChild(title);
 
     // Fetching Question content from cell
     const cellContent = cell.toJSON().source.split('\n');
@@ -94,9 +144,12 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
     //Creating form
     const box = document.createElement('fieldset');
     const overlay = document.createElement('form');
+    const title = document.createElement('h3');
+    title.textContent = 'Fill in the Blanks';
     box.appendChild(overlay);
     node.appendChild(box);
-    
+    overlay.appendChild(title);
+
     // Fetching Question content from cell
     const cellContent = cell.toJSON().source.split(" ");
     let question = document.createElement('div');
@@ -123,12 +176,15 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
         }
     }
     overlay.appendChild(question);
+
     const resultFIB = document.createElement('div');
     resultFIB.setAttribute('id', 'resultFIB');
     box.appendChild(resultFIB);
+
     const submitButtonFIB = document.createElement('button');
     submitButtonFIB.textContent = "Submit";
     box.appendChild(submitButtonFIB);
+
     submitButtonFIB.addEventListener('click', (event) => {
         event.preventDefault();
         let correct = true;
@@ -149,12 +205,134 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
             resultFIB.textContent = "All answers are correct!";
             submitButtonFIB.disabled = true;
         }
+    });
+}
+
+export const ppOverlay = (cell: any, node: HTMLElement) => {
+    //Creating form
+    const box = document.createElement('fieldset');
+    const overlay = document.createElement('form');
+    const title = document.createElement('h3');
+    title.textContent = 'Reorder the following code blocks by dragging them';
+    box.appendChild(overlay);
+    node.appendChild(box);
+    overlay.appendChild(title);
+
+    const ppContainer = document.createElement('div');
+    ppContainer.setAttribute('id', 'ppContainer');
+    overlay.appendChild(ppContainer);
+    const ppList = document.createElement('ul');
+    ppList.setAttribute('id', 'ppList');
+    ppContainer.appendChild(ppList);
+
+    // Fetching Question content from cell
+    const cellContent = cell.toJSON().source.split('\n');
+    let correctAnswers: { [id: string]: string; } = {};
+    let ppID = 1;
+    for (let i = 0; i < cellContent.length; i++) {
+        let statement = cellContent[i].trim();
+        let key: string = `PP${ppID}`;
+        correctAnswers[key] = statement;
+        ppID++;
+    }
+    const keys = Object.keys(correctAnswers);
+    for (let i = keys.length; i > 0; i--) {
+        let randIndex = Math.floor(Math.random() * keys.length);
+        const val = correctAnswers[keys[randIndex]];
+        let ppElem = document.createElement("li");
+        ppElem.id = keys[randIndex];
+        ppElem.classList.add("PPblock");
+        ppElem.draggable = true;
+        ppElem.textContent = val;
+        ppList.append(ppElem);
+        keys.splice(randIndex, 1);
+    }
+    let ppBlocks = document.querySelectorAll(".PPblock");
+    [].forEach.call(ppBlocks, function (item) {
+        addEventsDragAndDrop(item);
+    });
+
+    const resultPP = document.createElement('div');
+    resultPP.setAttribute('id', 'resultPP');
+    box.appendChild(resultPP);
+
+    const submitButtonPP = document.createElement('button');
+    submitButtonPP.textContent = "Submit";
+    box.appendChild(submitButtonPP);
+    submitButtonPP.addEventListener('click', (event) => {
+        event.preventDefault();
+        let ppBlocks = document.querySelectorAll(".PPblock");
+        for (let i = 0; i < ppBlocks.length; i++) {
+            let element = ppBlocks[i];
+
+            if (Number(element.id[2]) !== i + 1) {
+                resultPP.textContent = "Try Again";
+                return;
+            }
+        }
+        resultPP.textContent = "All answers are correct!";
+        submitButtonPP.disabled = true;
+        ppContainer.style.pointerEvents = "none";
     })
 }
 
-export const ppOverlay = (cell: any, node: HTMLElement, id: string) => {
-    return;
+function dragStart(this: HTMLElement, event: DragEvent) {
+    this.style.opacity = "0.4";
+    dragSrcEl = this;
+    if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/html", this.innerHTML);
+    }
 }
+
+function dragEnter(this: HTMLElement, event: DragEvent) {
+    this.classList.add("over");
+}
+
+function dragLeave(this: HTMLElement, event: DragEvent) {
+    event.stopPropagation();
+    this.classList.remove("over");
+}
+
+function dragOver(event: DragEvent) {
+    event.preventDefault();
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "move";
+    }
+    return false;
+}
+
+function dragDrop(this: HTMLElement, event: DragEvent) {
+    if (dragSrcEl != this && dragSrcEl != null) {
+        dragSrcEl.innerHTML = this.innerHTML;
+        if (event.dataTransfer && event.currentTarget instanceof HTMLElement) {
+            this.innerHTML = event.dataTransfer.getData("text/html");
+            let temp = event.currentTarget.id;
+            event.currentTarget.id = dragSrcEl.id;
+            dragSrcEl.id = temp;
+        }
+    }
+    return false;
+}
+
+function dragEnd(this: HTMLElement, event: DragEvent) {
+    const list = document.querySelectorAll(".PPblock");
+    list.forEach(function (item) {
+        item.classList.remove("over");
+    });
+    this.style.opacity = "1";
+}
+
+function addEventsDragAndDrop(el: HTMLElement) {
+    el.addEventListener("dragstart", dragStart, false);
+    el.addEventListener("dragenter", dragEnter, false);
+    el.addEventListener("dragover", dragOver, false);
+    el.addEventListener("dragleave", dragLeave, false);
+    el.addEventListener("drop", dragDrop, false);
+    el.addEventListener("dragend", dragEnd, false);
+}
+
+let dragSrcEl: HTMLElement | null;
 
 export const scafOverlay = (cell: any, node: HTMLElement, id: string) => {
     return;
