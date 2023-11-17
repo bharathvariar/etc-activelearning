@@ -3,7 +3,7 @@ import {
 	JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { hideCells, applyStyles, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay} from './utils'
+import { hideCells, applyStyles, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay, tabsOverlay } from './utils'
 
 /**
  * Initialization data for the etc_activelearning extension.
@@ -19,10 +19,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
 	) => {
 		console.log('JupyterLab extension etc_activelearning is activated!');
 		notebooktracker.widgetAdded.connect(async (_, notebookPanel: NotebookPanel) => {
-			// Waits for widget to be added. 
-			// Connect runs when it receives a signal on added widget and then we fetch the notebook panel
-			// Logic for getting cell list
-			// ? -> ensures that no errors even if the notebook is empty
 			await notebookPanel.revealed;
 			const notebook = app.shell.currentWidget as NotebookPanel;
 			const cellList = notebookPanel.content.model?.cells;
@@ -40,7 +36,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 							return widget.model === cell;
 						});
 						if (cellElement) {
-							hideCells(cellElement.node);
+							// hideCells(cellElement.node);
 						}
 						switch (activelearning) {
 							case 'mcq': {
@@ -77,6 +73,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
 								console.log("activelearning:  ", activelearning);
 								if (cellElement) {
 									skelOverlay(cell, cellElement?.node, cellElement?.model.id);
+								}
+								break;
+							}
+
+							case 'tab': {
+								console.log("activelearning: ", activelearning);
+								if (cellElement) {
+									tabsOverlay(cell, cellElement?.node, cellElement.model.id);
 								}
 								break;
 							}
