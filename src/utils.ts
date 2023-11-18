@@ -91,27 +91,26 @@ export const applyStyles = () => {
 	})
 }
 
-export const mcqOverlay = (cell: any, node: HTMLElement) => {
-
+function createForm(titleContent: string) {
 	//Creating form
 	const box = document.createElement('fieldset');
 	const overlay = document.createElement('form');
 	const title = document.createElement('h3');
-	title.textContent = 'Choose the most appropriate option';
+	title.textContent = titleContent;
 	box.appendChild(overlay);
-	node.appendChild(box);
 	overlay.appendChild(title);
+	return [box, overlay];
+}
 
-	// Fetching Question content from cell
-	const cellContent = cell.toJSON().source.split('\n');
+function mcqRender(cellContent: any) {
+
 	const question = document.createElement('p');
 	question.textContent = cellContent[0];
-	overlay.appendChild(question);
+	let optionContainer = document.createElement('div');
 
 	// Rendering  Options
 	for (let i = 1; i <= 4; i++) {
 		const option = cellContent[i][0];
-		let optionContainer = document.createElement('div');
 
 		let button = document.createElement('input');
 		button.setAttribute('type', 'radio');
@@ -120,6 +119,7 @@ export const mcqOverlay = (cell: any, node: HTMLElement) => {
 
 		let label = document.createElement('label');
 		label.innerText = cellContent[i].substring(1);
+		label.innerText += '\n';
 		label.setAttribute('id', `button-${i}`);
 
 		label.prepend(button);
@@ -138,11 +138,9 @@ export const mcqOverlay = (cell: any, node: HTMLElement) => {
 			}
 		}
 
-		overlay.appendChild(optionContainer);
 	}
 
 	let submitButtonMCQ = document.createElement('button');
-	box.appendChild(submitButtonMCQ);
 	submitButtonMCQ.textContent = "Submit";
 	submitButtonMCQ.addEventListener('click', (event) => {
 		event.preventDefault();
@@ -177,17 +175,27 @@ export const mcqOverlay = (cell: any, node: HTMLElement) => {
 		});
 		submitButtonMCQ.disabled = true;
 	});
+	return [question, optionContainer, submitButtonMCQ];
+}
+
+export const mcqOverlay = (cell: any, node: HTMLElement) => {
+
+	// Creating form
+	const [box, overlay] = createForm('Choose the most appropriate option');
+	node.appendChild(box);
+
+	// Fetching Question content from cell
+	const cellContent = cell.toJSON().source.split('\n');
+	const [question, optionContainer, submitButtonMCQ] = mcqRender(cellContent);
+	overlay.appendChild(question);
+	overlay.appendChild(optionContainer);
+	box.appendChild(submitButtonMCQ);
 }
 
 export const fibOverlay = (cell: any, node: HTMLElement) => {
 	//Creating form
-	const box = document.createElement('fieldset');
-	const overlay = document.createElement('form');
-	const title = document.createElement('h3');
-	title.textContent = 'Fill in the Blanks';
-	box.appendChild(overlay);
+	const [box, overlay] = createForm('Fill in the Blanks');
 	node.appendChild(box);
-	overlay.appendChild(title);
 
 	// Fetching Question content from cell
 	const cellContent = cell.toJSON().source.split(" ");
@@ -308,13 +316,8 @@ export const ppOverlay = (cell: any, node: HTMLElement) => {
 	let dragSrcEl: HTMLElement | null;
 
 	//Creating form
-	const box = document.createElement('fieldset');
-	const overlay = document.createElement('form');
-	const title = document.createElement('h3');
-	title.textContent = 'Reorder the following code blocks by dragging them';
-	box.appendChild(overlay);
+	const [box, overlay] = createForm('Reorder the following code blocks by dragging them');
 	node.appendChild(box);
-	overlay.appendChild(title);
 
 	const ppContainer = document.createElement('div');
 	ppContainer.setAttribute('id', 'ppContainer');
@@ -382,31 +385,20 @@ export const skelOverlay = (cell: any, node: HTMLElement, id: string) => {
 }
 
 export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
-	const tab = document.createElement('div');
-	node.appendChild(tab);
-	tab.classList.add('tab');
-	const tabNames = ['MCQTab', 'FIBTab', 'PPTab'];
-	const qTypes = ['Multiple Choice Questions', 'Fill in the Blanks', "Parson's Problems"];
-	for (let i = 0; i < qTypes.length; i++) {
-		const btn = createTabButton(tabNames[i], qTypes[i]);
-		tab.appendChild(btn);
-	}
 
 	function openTab(event: Event, tabID: string) {
 		event.preventDefault();
-		let i, tabContent, tabLinks;
-		tabContent = document.getElementsByClassName("tabContent");
+		let tabContent = document.querySelectorAll(".tabContent");
 		if (tabContent) {
-			for (i = 0; i < tabContent.length; i += 1) {
+			for (let i = 0; i < tabContent.length; i += 1) {
 				const tabContentElement = tabContent[i] as HTMLElement;
 				tabContentElement.style.display = "none";
 			}
 		}
-		tabLinks = document.getElementsByClassName("tabLinks");
-		for (i = 0; i < tabLinks.length; i += 1) {
-			tabLinks[i].className = tabLinks[i].className.replace(" active", "");
+		let tabLinks = document.querySelectorAll(".tabLinks");
+		for (let i = 0; i < tabLinks.length; i += 1) {
+			tabLinks[i].classList.remove("active");
 		}
-
 		let tab = document.getElementById(tabID);
 		if (tab) {
 			tab.style.display = "block";
@@ -417,16 +409,64 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		}
 	}
 
-
 	function createTabButton(id: string, title: string) {
 		let btn = document.createElement('button');
 		btn.setAttribute('id', id);
 		btn.classList.add('tabLinks');
 		btn.innerHTML = title;
-		btn.addEventListener('onclick', (event) => {
-			openTab(event, id);
-		});
+		btn.addEventListener('click', (event) => openTab(event, id));
 		return btn;
+	}
+
+	function creatTabDiv(id: string) {
+		const tabDiv = document.createElement('div');
+		tabDiv.setAttribute('id', id);
+		tabDiv.classList.add('tabContent');
+		return tabDiv;
+	}
+
+	const tab = document.createElement('div');
+	node.appendChild(tab);
+	tab.classList.add('tab');
+
+	const tabLinkNames = ['MCQTabLink', 'FIBTabLink', 'PPTabLink'];
+	const tabDivNames = ['MCQTabDiv', 'FIBTabDiv', 'PPTabDiv']
+	const qTypes = ['Multiple Choice Questions', 'Fill in the Blanks', "Parson's Problems"];
+	for (let i = 0; i < qTypes.length; i++) {
+		const btn = createTabButton(tabLinkNames[i], qTypes[i]);
+		tab.appendChild(btn);
+	}
+	for (let i = 0; i < qTypes.length; i++) {
+		const tabDiv = creatTabDiv(tabDivNames[i]);
+		node.appendChild(tabDiv);
+	}
+
+
+	const cellContent = cell.toJSON().source.split('---');
+	for (let i = 1; i < cellContent.length; i++) {
+		let questionType = cellContent[i].substring(0, 2);
+		let questionContent = cellContent[i].substring(3);
+		console.log(questionContent);
+
+		switch (questionType) {
+			case 'mc': {
+				// const tabDiv = document.querySelector('#MCQTabDiv');
+				// const [box, overlay] = createForm('Choose the most appropriate option');
+				// tabDiv?.appendChild(box);
+				// const [question, optionContainer, submitButtonMCQ] = mcqRender(questionContent.split('\n'));
+				// overlay.appendChild(question);
+				// overlay.appendChild(optionContainer);
+				// box.appendChild(submitButtonMCQ);
+
+				break;
+			}
+			case 'fb': {
+				break;
+			}
+			case 'pp': {
+				break;
+			}
+		}
 	}
 	return;
 }
