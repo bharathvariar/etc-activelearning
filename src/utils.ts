@@ -3,7 +3,7 @@ export const hideCells = (node: HTMLElement) => {
 	if (ele) {
 		ele.style.display = 'none';
 	}
-}
+};
 
 export const applyStyles = () => {
 
@@ -89,7 +89,7 @@ export const applyStyles = () => {
 		const activeTabButtonElement = activeTabButton as HTMLElement;
 		activeTabButtonElement.style.backgroundColor = '#ccc';
 	})
-}
+};
 
 function createForm(titleContent: string) {
 	//Creating form
@@ -100,7 +100,7 @@ function createForm(titleContent: string) {
 	box.appendChild(overlay);
 	overlay.appendChild(title);
 	return [box, overlay];
-}
+};
 
 function mcqRender(cellContent: any) {
 
@@ -175,8 +175,9 @@ function mcqRender(cellContent: any) {
 		});
 		submitButtonMCQ.disabled = true;
 	});
+	console.log('Rendered by mcqRender()');
 	return [question, optionContainer, submitButtonMCQ];
-}
+};
 
 export const mcqOverlay = (cell: any, node: HTMLElement) => {
 
@@ -190,15 +191,9 @@ export const mcqOverlay = (cell: any, node: HTMLElement) => {
 	overlay.appendChild(question);
 	overlay.appendChild(optionContainer);
 	box.appendChild(submitButtonMCQ);
-}
+};
 
-export const fibOverlay = (cell: any, node: HTMLElement) => {
-	//Creating form
-	const [box, overlay] = createForm('Fill in the Blanks');
-	node.appendChild(box);
-
-	// Fetching Question content from cell
-	const cellContent = cell.toJSON().source.split(" ");
+function fibRender(cellContent: any) {
 	let question = document.createElement('div');
 	let correctAnswers: { [id: string]: string; } = {};
 	let blankID = 1;
@@ -223,15 +218,12 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
 		}
 		question.setAttribute('line-height', '1.5');
 	}
-	overlay.appendChild(question);
 
 	const resultFIB = document.createElement('div');
 	resultFIB.setAttribute('id', 'resultFIB');
-	box.appendChild(resultFIB);
 
 	const submitButtonFIB = document.createElement('button');
 	submitButtonFIB.textContent = "Submit";
-	box.appendChild(submitButtonFIB);
 
 	submitButtonFIB.addEventListener('click', (event) => {
 		event.preventDefault();
@@ -254,7 +246,22 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
 			submitButtonFIB.disabled = true;
 		}
 	});
-}
+	console.log('Rendered by fibRender()');
+	return [question, resultFIB, submitButtonFIB]
+};
+
+export const fibOverlay = (cell: any, node: HTMLElement) => {
+	//Creating form
+	const [box, overlay] = createForm('Fill in the Blanks');
+	node.appendChild(box);
+
+	// Fetching Question content from cell
+	const cellContent = cell.toJSON().source.split(" ");
+	const [question, resultFIB, submitButtonFIB] = fibRender(cellContent);
+	overlay.appendChild(question);
+	box.appendChild(resultFIB);
+	box.appendChild(submitButtonFIB);
+};
 
 export const ppOverlay = (cell: any, node: HTMLElement) => {
 	function dragStart(this: HTMLElement, event: DragEvent) {
@@ -379,15 +386,16 @@ export const ppOverlay = (cell: any, node: HTMLElement) => {
 
 export const scafOverlay = (cell: any, node: HTMLElement, id: string) => {
 	return;
-}
+};
+
 export const skelOverlay = (cell: any, node: HTMLElement, id: string) => {
 	return;
-}
+};
 
 export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 
 	function openTab(event: Event, tabID: string) {
-		event.preventDefault();
+		// event.preventDefault();
 		let tabContent = document.querySelectorAll(".tabContent");
 		if (tabContent) {
 			for (let i = 0; i < tabContent.length; i += 1) {
@@ -403,8 +411,8 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		if (tab) {
 			tab.style.display = "block";
 		}
-		if (event.currentTarget) {
-			const eventElem = event.currentTarget as HTMLElement;
+		if (event.target) {
+			const eventElem = event.target as HTMLElement;
 			eventElem.classList.add('active');
 		}
 	}
@@ -414,7 +422,9 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		btn.setAttribute('id', id);
 		btn.classList.add('tabLinks');
 		btn.innerHTML = title;
-		btn.addEventListener('click', (event) => openTab(event, id));
+		btn.addEventListener('click', (event) => {
+			openTab(event, id);
+		});
 		return btn;
 	}
 
@@ -450,14 +460,13 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 
 		switch (questionType) {
 			case 'mc': {
-				// const tabDiv = document.querySelector('#MCQTabDiv');
-				// const [box, overlay] = createForm('Choose the most appropriate option');
-				// tabDiv?.appendChild(box);
-				// const [question, optionContainer, submitButtonMCQ] = mcqRender(questionContent.split('\n'));
-				// overlay.appendChild(question);
-				// overlay.appendChild(optionContainer);
-				// box.appendChild(submitButtonMCQ);
-
+				const tabDiv = document.querySelector('#MCQTabDiv');
+				const [box, overlay] = createForm('Choose the most appropriate option');
+				tabDiv?.appendChild(box);
+				const [question, optionContainer, submitButtonMCQ] = mcqRender(questionContent.split('\n'));
+				overlay.appendChild(question);
+				overlay.appendChild(optionContainer);
+				box.appendChild(submitButtonMCQ);
 				break;
 			}
 			case 'fb': {
@@ -469,4 +478,4 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		}
 	}
 	return;
-}
+};
