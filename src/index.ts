@@ -3,7 +3,7 @@ import {
 	JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { hideCells, applyStyles, mcqOverlay, ppOverlay, fibOverlay, scafOverlay, skelOverlay, tabsOverlay } from './utils'
+import { applyStyles, mcqOverlay, ppOverlay, fibOverlay, tabsOverlay } from './utils'
 
 /**
  * Initialization data for the etc_activelearning extension.
@@ -18,77 +18,64 @@ const plugin: JupyterFrontEndPlugin<void> = {
 		notebooktracker: INotebookTracker
 	) => {
 		console.log('JupyterLab extension etc_activelearning is activated!');
-		notebooktracker.widgetAdded.connect(async (_, notebookPanel: NotebookPanel) => {
-			await notebookPanel.revealed;
-			const notebook = app.shell.currentWidget as NotebookPanel;
-			const cellList = notebookPanel.content.model?.cells;
-			requestAnimationFrame(() => {
-				console.log('eventlistener');
-				applyStyles();
-			});
-			if (cellList !== undefined) {
-				for (let i = 0; i < cellList.length; i++) {
-					let cell = cellList?.get(i);
-					let metadata = cell.metadata;
-					let activelearning = metadata?.activelearning;
-					if (activelearning) {
-						const cellElement = notebook.content.widgets.find(widget => {
-							return widget.model === cell;
-						});
-						if (cellElement) {
-							// hideCells(cellElement.node);
-						}
-						switch (activelearning) {
-							case 'mcq': {
-								console.log("activelearning: ", activelearning);
-								if (cellElement) {
-									// hideCells(cellElement.node);
-									mcqOverlay(cell, cellElement.node);
-								}
-								break;
+		notebooktracker.widgetAdded.connect((_, notebookPanel: NotebookPanel) => {
+			notebookPanel.revealed.then(() => {
+
+				const notebook = app.shell.currentWidget as NotebookPanel;
+				const cellList = notebookPanel.content.model?.cells;
+				requestAnimationFrame(() => {
+					applyStyles();
+				});
+				if (cellList !== undefined) {
+					for (let i = 0; i < cellList.length; i++) {
+						let cell = cellList?.get(i);
+						let metadata = cell.metadata;
+						let activelearning = metadata?.activelearning;
+						if (activelearning) {
+							const cellElement = notebook.content.widgets.find(widget => {
+								return widget.model === cell;
+							});
+							if (cellElement) {
+								cellElement.node.classList.add('activelearning');
 							}
-							case 'fib': {
-								console.log("activelearning:  ", activelearning);
-								if (cellElement) {
-									// hideCells(cellElement.node);
-									fibOverlay(cell, cellElement.node);
+							switch (activelearning) {
+								case 'mcq': {
+									console.log("activelearning:", activelearning);
+									if (cellElement) {
+										mcqOverlay(cell, cellElement.node);
+									}
+									break;
 								}
-								break;
-							}
-							case 'pp': {
-								console.log("activelearning:  ", activelearning);
-								if (cellElement) {
-									ppOverlay(cell, cellElement.node);
+								case 'tab': {
+									console.log("activelearning:", activelearning);
+									console.log("tab:", cellElement);
+									if (cellElement) {
+										tabsOverlay(cell, cellElement.node);
+									}
+									break;
 								}
-								break;
-							}
-							case 'scaf': {
-								console.log("activelearning:  ", activelearning);
-								if (cellElement) {
-									scafOverlay(cell, cellElement?.node, cellElement?.model.id);
+								case 'fib': {
+									console.log("activelearning:", activelearning);
+									if (cellElement) {
+										fibOverlay(cell, cellElement.node);
+									}
+									break;
 								}
-								break;
-							}
-							case 'skel': {
-								console.log("activelearning:  ", activelearning);
-								if (cellElement) {
-									skelOverlay(cell, cellElement?.node, cellElement?.model.id);
+								case 'pp': {
+									console.log("activelearning:", activelearning);
+									if (cellElement) {
+										ppOverlay(cell, cellElement.node);
+									}
+									break;
 								}
-								break;
+
 							}
 
-							case 'tab': {
-								console.log("activelearning: ", activelearning);
-								if (cellElement) {
-									tabsOverlay(cell, cellElement?.node, cellElement.model.id);
-								}
-								break;
-							}
-						}
 
+						}
 					}
-				}
-			};
+				};
+			});
 		}
 		)
 	}

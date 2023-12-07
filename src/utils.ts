@@ -1,10 +1,3 @@
-export const hideCells = (node: HTMLElement) => {
-	const ele = node.querySelector<HTMLElement>('.jp-Cell-inputWrapper');
-	if (ele) {
-		ele.style.display = 'none';
-	}
-};
-
 export const applyStyles = () => {
 
 	// Styles for FIB inputs
@@ -16,7 +9,6 @@ export const applyStyles = () => {
 	});
 
 	// Styles for PP Blocks and their movements
-	console.log('applyStyles');
 	let ppBlocks = document.querySelectorAll(".PPblock");
 	ppBlocks.forEach((ppBlock: Element) => {
 		const ppBlockElement = ppBlock as HTMLElement; // Cast to HTMLElement
@@ -144,7 +136,7 @@ function mcqRender(cellContent: any) {
 	submitButtonMCQ.textContent = "Submit";
 	submitButtonMCQ.addEventListener('click', (event) => {
 		event.preventDefault();
-		const options = document.querySelectorAll<HTMLInputElement>('.mcq.button');
+		const options = optionContainer.querySelectorAll<HTMLInputElement>('.mcq.button');
 		let optionSelected = false;
 		for (let i = 0; i < 4; i++) {
 			let option = options[i];
@@ -160,8 +152,8 @@ function mcqRender(cellContent: any) {
 		}
 
 		// Get correct and incorrect options
-		const correctOptions = document.querySelectorAll<HTMLInputElement>(".mcq.correct");
-		const incorrectOptions = document.querySelectorAll<HTMLInputElement>(".mcq.incorrect");
+		const correctOptions = optionContainer.querySelectorAll<HTMLInputElement>(".mcq.correct");
+		const incorrectOptions = optionContainer.querySelectorAll<HTMLInputElement>(".mcq.incorrect");
 
 		// Apply styles to correct options (green) and incorrect options (red)
 		correctOptions.forEach(option => {
@@ -175,7 +167,6 @@ function mcqRender(cellContent: any) {
 		});
 		submitButtonMCQ.disabled = true;
 	});
-	console.log('Rendered by mcqRender()');
 	return [question, optionContainer, submitButtonMCQ];
 };
 
@@ -229,8 +220,7 @@ function fibRender(cellContent: any) {
 		event.preventDefault();
 		let correct = true;
 		for (const blank in correctAnswers) {
-			console.log("blankID: ", blank);
-			const inputField = document.querySelector<HTMLElement>(`#${blank}`) as HTMLInputElement;
+			const inputField = question.querySelector<HTMLElement>(`#${blank}`) as HTMLInputElement;
 			const userAnswer = inputField?.value.trim().toLowerCase();
 			const correctAnswer = correctAnswers[blank];
 			if (userAnswer === correctAnswer) {
@@ -246,7 +236,6 @@ function fibRender(cellContent: any) {
 			submitButtonFIB.disabled = true;
 		}
 	});
-	console.log('Rendered by fibRender()');
 	return [question, resultFIB, submitButtonFIB]
 };
 
@@ -263,78 +252,71 @@ export const fibOverlay = (cell: any, node: HTMLElement) => {
 	box.appendChild(submitButtonFIB);
 };
 
-export const ppOverlay = (cell: any, node: HTMLElement) => {
-	function dragStart(this: HTMLElement, event: DragEvent) {
-		this.style.opacity = "0.4";
-		dragSrcEl = this;
-		if (event.dataTransfer) {
-			event.dataTransfer.effectAllowed = "move";
-			event.dataTransfer.setData("text/html", this.innerHTML);
+function dragStart(this: HTMLElement, event: DragEvent) {
+	this.style.opacity = "0.4";
+	dragSrcEl = this;
+	if (event.dataTransfer) {
+		event.dataTransfer.effectAllowed = "move";
+		event.dataTransfer.setData("text/html", this.innerHTML);
+	}
+}
+
+function dragEnter(this: HTMLElement, event: DragEvent) {
+	this.classList.add("over");
+}
+
+function dragLeave(this: HTMLElement, event: DragEvent) {
+	event.stopPropagation();
+	this.classList.remove("over");
+}
+
+function dragOver(event: DragEvent) {
+	event.preventDefault();
+	if (event.dataTransfer) {
+		event.dataTransfer.dropEffect = "move";
+	}
+	return false;
+}
+
+function dragDrop(this: HTMLElement, event: DragEvent) {
+	if (dragSrcEl != this && dragSrcEl != null) {
+		dragSrcEl.innerHTML = this.innerHTML;
+		if (event.dataTransfer && event.currentTarget instanceof HTMLElement) {
+			this.innerHTML = event.dataTransfer.getData("text/html");
+			let temp = event.currentTarget.id;
+			event.currentTarget.id = dragSrcEl.id;
+			dragSrcEl.id = temp;
 		}
 	}
+	return false;
+}
 
-	function dragEnter(this: HTMLElement, event: DragEvent) {
-		this.classList.add("over");
-	}
+function dragEnd(this: HTMLElement, event: DragEvent) {
+	const list = document.querySelectorAll(".PPblock");
+	list.forEach(function (item) {
+		item.classList.remove("over");
+	});
+	this.style.opacity = "1";
+}
 
-	function dragLeave(this: HTMLElement, event: DragEvent) {
-		event.stopPropagation();
-		this.classList.remove("over");
-	}
+function addEventsDragAndDrop(el: HTMLElement) {
+	el.addEventListener("dragstart", dragStart, false);
+	el.addEventListener("dragenter", dragEnter, false);
+	el.addEventListener("dragover", dragOver, false);
+	el.addEventListener("dragleave", dragLeave, false);
+	el.addEventListener("drop", dragDrop, false);
+	el.addEventListener("dragend", dragEnd, false);
+}
 
-	function dragOver(event: DragEvent) {
-		event.preventDefault();
-		if (event.dataTransfer) {
-			event.dataTransfer.dropEffect = "move";
-		}
-		return false;
-	}
+let dragSrcEl: HTMLElement | null;
 
-	function dragDrop(this: HTMLElement, event: DragEvent) {
-		if (dragSrcEl != this && dragSrcEl != null) {
-			dragSrcEl.innerHTML = this.innerHTML;
-			if (event.dataTransfer && event.currentTarget instanceof HTMLElement) {
-				this.innerHTML = event.dataTransfer.getData("text/html");
-				let temp = event.currentTarget.id;
-				event.currentTarget.id = dragSrcEl.id;
-				dragSrcEl.id = temp;
-			}
-		}
-		return false;
-	}
-
-	function dragEnd(this: HTMLElement, event: DragEvent) {
-		const list = document.querySelectorAll(".PPblock");
-		list.forEach(function (item) {
-			item.classList.remove("over");
-		});
-		this.style.opacity = "1";
-	}
-
-	function addEventsDragAndDrop(el: HTMLElement) {
-		el.addEventListener("dragstart", dragStart, false);
-		el.addEventListener("dragenter", dragEnter, false);
-		el.addEventListener("dragover", dragOver, false);
-		el.addEventListener("dragleave", dragLeave, false);
-		el.addEventListener("drop", dragDrop, false);
-		el.addEventListener("dragend", dragEnd, false);
-	}
-
-	let dragSrcEl: HTMLElement | null;
-
-	//Creating form
-	const [box, overlay] = createForm('Reorder the following code blocks by dragging them');
-	node.appendChild(box);
-
+function ppRender(cellContent: any) {
 	const ppContainer = document.createElement('div');
 	ppContainer.setAttribute('id', 'ppContainer');
-	overlay.appendChild(ppContainer);
 	const ppList = document.createElement('ul');
 	ppList.setAttribute('id', 'ppList');
 	ppContainer.appendChild(ppList);
 
-	// Fetching Question content from cell
-	const cellContent = cell.toJSON().source.split('\n');
 	let correctAnswers: { [id: string]: string; } = {};
 	let ppID = 1;
 	for (let i = 0; i < cellContent.length; i++) {
@@ -355,21 +337,15 @@ export const ppOverlay = (cell: any, node: HTMLElement) => {
 		ppList.append(ppElem);
 		keys.splice(randIndex, 1);
 	}
-	let ppBlocks = document.querySelectorAll(".PPblock");
-	[].forEach.call(ppBlocks, function (item) {
-		addEventsDragAndDrop(item);
-	});
 
 	const resultPP = document.createElement('div');
 	resultPP.setAttribute('id', 'resultPP');
-	box.appendChild(resultPP);
 
 	const submitButtonPP = document.createElement('button');
 	submitButtonPP.textContent = "Submit";
-	box.appendChild(submitButtonPP);
 	submitButtonPP.addEventListener('click', (event) => {
 		event.preventDefault();
-		let ppBlocks = document.querySelectorAll(".PPblock");
+		let ppBlocks = ppContainer.querySelectorAll(".PPblock");
 		for (let i = 0; i < ppBlocks.length; i++) {
 			let element = ppBlocks[i];
 
@@ -382,32 +358,41 @@ export const ppOverlay = (cell: any, node: HTMLElement) => {
 		submitButtonPP.disabled = true;
 		ppContainer.style.pointerEvents = "none";
 	})
+	return [ppContainer, resultPP, submitButtonPP]
+}
+export const ppOverlay = (cell: any, node: HTMLElement) => {
+
+	//Creating form
+	const [box, overlay] = createForm('Reorder the following code blocks by dragging them');
+	node.appendChild(box);
+
+	// Fetching Question content from cell
+	const cellContent = cell.toJSON().source.split('\n');
+	const [ppContainer, resultPP, submitButtonPP] = ppRender(cellContent);
+	overlay.appendChild(ppContainer);
+	box.appendChild(resultPP);
+	box.appendChild(submitButtonPP);
+	let ppBlocks = document.querySelectorAll(".PPblock");
+	[].forEach.call(ppBlocks, function (item) {
+		addEventsDragAndDrop(item);
+	});
 }
 
-export const scafOverlay = (cell: any, node: HTMLElement, id: string) => {
-	return;
-};
-
-export const skelOverlay = (cell: any, node: HTMLElement, id: string) => {
-	return;
-};
-
-export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
+export const tabsOverlay = (cell: any, node: HTMLElement) => {
 
 	function openTab(event: Event, tabID: string) {
-		// event.preventDefault();
-		let tabContent = document.querySelectorAll(".tabContent");
+		let tabContent = node.querySelectorAll(".tabContent");
 		if (tabContent) {
 			for (let i = 0; i < tabContent.length; i += 1) {
 				const tabContentElement = tabContent[i] as HTMLElement;
 				tabContentElement.style.display = "none";
 			}
 		}
-		let tabLinks = document.querySelectorAll(".tabLinks");
+		let tabLinks = node.querySelectorAll(".tabLinks");
 		for (let i = 0; i < tabLinks.length; i += 1) {
 			tabLinks[i].classList.remove("active");
 		}
-		let tab = document.getElementById(tabID);
+		let tab = node.querySelector(`#${tabID}`) as HTMLElement;
 		if (tab) {
 			tab.style.display = "block";
 		}
@@ -417,13 +402,12 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		}
 	}
 
-	function createTabButton(id: string, title: string) {
+	function createTabButton(id: string, title: string, tabID: string) {
 		let btn = document.createElement('button');
-		btn.setAttribute('id', id);
 		btn.classList.add('tabLinks');
 		btn.innerHTML = title;
 		btn.addEventListener('click', (event) => {
-			openTab(event, id);
+			openTab(event, tabID);
 		});
 		return btn;
 	}
@@ -432,6 +416,7 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		const tabDiv = document.createElement('div');
 		tabDiv.setAttribute('id', id);
 		tabDiv.classList.add('tabContent');
+		tabDiv.style.display = "none";
 		return tabDiv;
 	}
 
@@ -443,7 +428,7 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 	const tabDivNames = ['MCQTabDiv', 'FIBTabDiv', 'PPTabDiv']
 	const qTypes = ['Multiple Choice Questions', 'Fill in the Blanks', "Parson's Problems"];
 	for (let i = 0; i < qTypes.length; i++) {
-		const btn = createTabButton(tabLinkNames[i], qTypes[i]);
+		const btn = createTabButton(tabLinkNames[i], qTypes[i], tabDivNames[i]);
 		tab.appendChild(btn);
 	}
 	for (let i = 0; i < qTypes.length; i++) {
@@ -451,17 +436,15 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 		node.appendChild(tabDiv);
 	}
 
-
 	const cellContent = cell.toJSON().source.split('---');
 	for (let i = 1; i < cellContent.length; i++) {
 		let questionType = cellContent[i].substring(0, 2);
 		let questionContent = cellContent[i].substring(3);
-		console.log(questionContent);
 
 		switch (questionType) {
 			case 'mc': {
-				const tabDiv = document.querySelector('#MCQTabDiv');
 				const [box, overlay] = createForm('Choose the most appropriate option');
+				const tabDiv = node.querySelector('#MCQTabDiv');
 				tabDiv?.appendChild(box);
 				const [question, optionContainer, submitButtonMCQ] = mcqRender(questionContent.split('\n'));
 				overlay.appendChild(question);
@@ -470,9 +453,29 @@ export const tabsOverlay = (cell: any, node: HTMLElement, id: string) => {
 				break;
 			}
 			case 'fb': {
+				const [box, overlay] = createForm('Fill in the Blanks');
+				const tabDiv = node.querySelector('#FIBTabDiv');
+				tabDiv?.appendChild(box);
+				const [question, resultFIB, submitButtonFIB] = fibRender(questionContent.split(' '));
+				overlay.appendChild(question);
+				box.appendChild(resultFIB);
+				box.appendChild(submitButtonFIB);
 				break;
 			}
 			case 'pp': {
+				//Creating form
+				const [box, overlay] = createForm('Reorder the following code blocks by dragging them');
+				const tabDiv = node.querySelector('#PPTabDiv');
+				tabDiv?.appendChild(box);
+				// Fetching Question content from cell
+				const [ppContainer, resultPP, submitButtonPP] = ppRender(questionContent.split('\n'));
+				overlay.appendChild(ppContainer);
+				box.appendChild(resultPP);
+				box.appendChild(submitButtonPP);
+				let ppBlocks = node.querySelectorAll(".PPblock");
+				[].forEach.call(ppBlocks, function (item) {
+					addEventsDragAndDrop(item);
+				});
 				break;
 			}
 		}
