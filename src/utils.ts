@@ -1,3 +1,5 @@
+
+
 function createForm(titleContent: string) {
 	//Creating form
 	const box = document.createElement('fieldset');
@@ -47,9 +49,7 @@ function mcqRender(cellContent: any) {
 
 	}
 
-	let submitButtonMCQ = document.createElement('button');
-	submitButtonMCQ.textContent = "Submit";
-	submitButtonMCQ.addEventListener('click', (event) => {
+	function submitMCQ(event: Event) {
 		event.preventDefault();
 		const options = optionContainer.querySelectorAll<HTMLInputElement>('.mcq.button');
 		let optionSelected = false;
@@ -81,6 +81,15 @@ function mcqRender(cellContent: any) {
 			option.disabled = true;
 		});
 		submitButtonMCQ.disabled = true;
+	}
+
+	const submitButtonMCQ = document.createElement('button');
+	submitButtonMCQ.textContent = "Submit";
+	submitButtonMCQ.addEventListener('click', submitMCQ);
+	optionContainer.addEventListener('keypress', (event: KeyboardEvent) => {
+		if (event.key === 'Enter') {
+			submitMCQ(event);
+		}
 	});
 	return [question, optionContainer, submitButtonMCQ];
 };
@@ -128,10 +137,7 @@ function fibRender(cellContent: any) {
 	const resultFIB = document.createElement('div');
 	resultFIB.setAttribute('id', 'resultFIB');
 
-	const submitButtonFIB = document.createElement('button');
-	submitButtonFIB.textContent = "Submit";
-
-	submitButtonFIB.addEventListener('click', (event) => {
+	function submitFIB(event: Event) {
 		event.preventDefault();
 		let correct = true;
 		for (const blank in correctAnswers) {
@@ -149,6 +155,16 @@ function fibRender(cellContent: any) {
 		if (correct) {
 			resultFIB.textContent = "All answers are correct!";
 			submitButtonFIB.disabled = true;
+		}
+	}
+
+	const submitButtonFIB = document.createElement('button');
+	submitButtonFIB.textContent = "Submit";
+	submitButtonFIB.addEventListener('click', submitFIB);
+	question.addEventListener('keypress', (event: KeyboardEvent) => {
+		console.log(event.key);
+		if (event.key === 'Enter') {
+			submitFIB(event);
 		}
 	});
 	return [question, resultFIB, submitButtonFIB]
@@ -251,14 +267,18 @@ function ppRender(cellContent: any) {
 		ppElem.textContent = val;
 		ppList.append(ppElem);
 		keys.splice(randIndex, 1);
+		ppElem.addEventListener('keypress', (event: KeyboardEvent) => {
+			console.log(event.key);
+			if (event.key === 'Enter') {
+				submitPP(event);
+			}
+		});
 	}
 
 	const resultPP = document.createElement('div');
 	resultPP.setAttribute('id', 'resultPP');
 
-	const submitButtonPP = document.createElement('button');
-	submitButtonPP.textContent = "Submit";
-	submitButtonPP.addEventListener('click', (event) => {
+	function submitPP(event: Event) {
 		event.preventDefault();
 		let ppBlocks = ppContainer.querySelectorAll(".PPblock");
 		for (let i = 0; i < ppBlocks.length; i++) {
@@ -272,7 +292,17 @@ function ppRender(cellContent: any) {
 		resultPP.textContent = "All answers are correct!";
 		submitButtonPP.disabled = true;
 		ppContainer.style.pointerEvents = "none";
-	})
+	}
+
+	const submitButtonPP = document.createElement('button');
+	submitButtonPP.textContent = "Submit";
+	submitButtonPP.addEventListener('click', submitPP);
+	ppList.addEventListener('keypress', (event: KeyboardEvent) => {
+		console.log(event.key);
+		if (event.key === 'Enter') {
+			submitPP(event);
+		}
+	});
 	return [ppContainer, resultPP, submitButtonPP]
 }
 export const ppOverlay = (cell: any, node: HTMLElement) => {
