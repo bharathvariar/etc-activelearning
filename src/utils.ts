@@ -1,88 +1,3 @@
-export const applyStyles = () => {
-
-	// Styles for FIB inputs
-	let textInputs = document.querySelectorAll('input[type="text"]');
-	textInputs.forEach((textInput: Element) => {
-		const textInputElement = textInput as HTMLInputElement; // Cast to HTMLInputElement
-		textInputElement.style.width = "auto";
-		textInputElement.style.textAlign = "center";
-	});
-
-	// Styles for PP Blocks and their movements
-	let ppBlocks = document.querySelectorAll(".PPblock");
-	ppBlocks.forEach((ppBlock: Element) => {
-		const ppBlockElement = ppBlock as HTMLElement; // Cast to HTMLElement
-		ppBlockElement.style.willChange = "transform";
-		ppBlockElement.style.textAlign = "center";
-		ppBlockElement.style.borderRadius = "10px";
-		ppBlockElement.style.height = "50px";
-		ppBlockElement.style.listStyleType = "none";
-		ppBlockElement.style.margin = "10px";
-		ppBlockElement.style.backgroundColor = "#ccc";
-		ppBlockElement.style.width = "250px";
-		ppBlockElement.style.lineHeight = "3.2";
-		ppBlockElement.style.paddingLeft = "10px";
-		ppBlockElement.style.cursor = "move";
-		ppBlockElement.style.transition = "all 200ms";
-		ppBlockElement.style.userSelect = "none";
-		ppBlockElement.style.margin = "10px auto";
-		ppBlockElement.style.position = "relative";
-		ppBlockElement.style.borderColor = "black";
-		ppBlockElement.style.borderWidth = "200px";
-	});
-
-	let overElements = document.querySelectorAll(".over");
-	overElements.forEach((element: Element) => {
-		const overElement = element as HTMLElement; // Cast to HTMLElement
-		overElement.style.transform = "scale(1.1, 1.1)";
-	});
-
-	// Apply styles to ul
-	let ulList = document.querySelectorAll('ul');
-	ulList.forEach((ul: Element) => {
-		const ulElement = ul as HTMLElement; // Cast to HTMLElement
-		ulElement.style.padding = "0px";
-	});
-
-	// Styles for tabs
-	let tabList = document.querySelectorAll('.tab');
-	tabList.forEach((tab: Element) => {
-		const tabElement = tab as HTMLElement;
-		tabElement.style.overflow = "hidden";
-		tabElement.style.border = "1px solid #ccc";
-		tabElement.style.backgroundColor = "#f1f1f1";
-	});
-
-	let tabLinksList = document.querySelectorAll('.tab .tabLinks');
-	tabLinksList.forEach((tabLinks: Element) => {
-		const tabLinksElement = tabLinks as HTMLElement;
-		tabLinksElement.style.backgroundColor = "";
-		tabLinksElement.style.float = "left";
-		tabLinksElement.style.border = "none";
-		tabLinksElement.style.outline = "none";
-		tabLinksElement.style.cursor = "pointer";
-		tabLinksElement.style.padding = "14px 16px";
-		tabLinksElement.style.transition = "0.3s";
-		tabLinksElement.style.fontSize = "17px";
-	});
-
-	let tabButtonList = document.querySelectorAll('.tab button');
-	tabButtonList.forEach((tabButton: Element) => {
-		const tabButtonElement = tabButton as HTMLElement;
-		tabButtonElement.addEventListener("mouseover", () => {
-			tabButtonElement.style.backgroundColor = "#ddd";
-		});
-		tabButtonElement.addEventListener("mouseout", () => {
-			tabButtonElement.style.backgroundColor = "";
-		});
-	})
-	let activeTabButtonList = document.querySelectorAll('.tab button.active');
-	activeTabButtonList.forEach((activeTabButton: Element) => {
-		const activeTabButtonElement = activeTabButton as HTMLElement;
-		activeTabButtonElement.style.backgroundColor = '#ccc';
-	})
-};
-
 function createForm(titleContent: string) {
 	//Creating form
 	const box = document.createElement('fieldset');
@@ -412,11 +327,11 @@ export const tabsOverlay = (cell: any, node: HTMLElement) => {
 		return btn;
 	}
 
-	function creatTabDiv(id: string) {
+	function creatTabDiv(id: string, hide: boolean) {
 		const tabDiv = document.createElement('div');
 		tabDiv.setAttribute('id', id);
 		tabDiv.classList.add('tabContent');
-		tabDiv.style.display = "none";
+		if (hide) { tabDiv.style.display = "none"; }
 		return tabDiv;
 	}
 
@@ -431,8 +346,12 @@ export const tabsOverlay = (cell: any, node: HTMLElement) => {
 		const btn = createTabButton(tabLinkNames[i], qTypes[i], tabDivNames[i]);
 		tab.appendChild(btn);
 	}
-	for (let i = 0; i < qTypes.length; i++) {
-		const tabDiv = creatTabDiv(tabDivNames[i]);
+
+	const tabDiv = creatTabDiv(tabDivNames[0], false);
+	node.appendChild(tabDiv);
+
+	for (let i = 1; i < qTypes.length; i++) {
+		const tabDiv = creatTabDiv(tabDivNames[i], true);
 		node.appendChild(tabDiv);
 	}
 
