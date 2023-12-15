@@ -1,5 +1,3 @@
-
-
 function createForm(titleContent: string) {
 	//Creating form
 	const box = document.createElement('fieldset');
@@ -162,7 +160,6 @@ function fibRender(cellContent: any) {
 	submitButtonFIB.textContent = "Submit";
 	submitButtonFIB.addEventListener('click', submitFIB);
 	question.addEventListener('keypress', (event: KeyboardEvent) => {
-		console.log(event.key);
 		if (event.key === 'Enter') {
 			submitFIB(event);
 		}
@@ -267,12 +264,6 @@ function ppRender(cellContent: any) {
 		ppElem.textContent = val;
 		ppList.append(ppElem);
 		keys.splice(randIndex, 1);
-		ppElem.addEventListener('keypress', (event: KeyboardEvent) => {
-			console.log(event.key);
-			if (event.key === 'Enter') {
-				submitPP(event);
-			}
-		});
 	}
 
 	const resultPP = document.createElement('div');
@@ -297,8 +288,7 @@ function ppRender(cellContent: any) {
 	const submitButtonPP = document.createElement('button');
 	submitButtonPP.textContent = "Submit";
 	submitButtonPP.addEventListener('click', submitPP);
-	ppList.addEventListener('keypress', (event: KeyboardEvent) => {
-		console.log(event.key);
+	ppContainer.addEventListener('keypress', (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			submitPP(event);
 		}
